@@ -70,9 +70,31 @@ them lives.
 
 ---
 
-## Quick start
+## Quick start after cloning
+
+This walks through everything a fresh `git clone` needs before the first
+real dataset generation run -- what's already in the repo, what you have
+to add yourself, and the exact command that kicks off generation.
+
+### What you get from the clone, with nothing else done
+
+```
+sign-augmentation-pipeline/
+├── pipeline/            already there, ready to run
+├── templates/           already there -- ~150 bundled SVG files
+├── docs/                already there
+├── background_footage/  EMPTY except a README.md placeholder -- see step 2
+└── output/              does not exist yet -- created automatically on first run
+```
+
+`background_footage/` is the **only** thing missing before you can generate
+data -- the real photos it needs are your own footage, so they're excluded
+from git (`.gitignore`) and don't ship with the repo.
+
+### Step 1 -- install dependencies
 
 ```bash
+cd sign-augmentation-pipeline
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
@@ -80,23 +102,83 @@ pip install -r requirements.txt
 export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"   # Apple Silicon
 # export DYLD_LIBRARY_PATH="/usr/local/lib:$DYLD_LIBRARY_PATH"    # Intel Mac
 # (not needed on Linux if your distro's cairo package is installed normally)
+```
 
-# 1. (re)generate the SVG templates -- optional, the repo already ships
-#    with a full set under templates/
+### Step 2 -- add your background footage (video → frames → 4 folders)
+
+The pipeline composites signs onto **real background photos**, not video --
+if what you have is a video file (a ride-along recording, a dashcam clip,
+whatever), pull frames out of it first, e.g. with `ffmpeg`:
+
+```bash
+# extracts every 5th frame -- adjust the "5" to taste; consecutive video
+# frames are near-duplicates, so there's rarely a reason to keep every one
+ffmpeg -i my_video.mp4 -vf "select='not(mod(n\,5))'" -vsync vfr frame_%05d.jpg
+```
+
+If you already have an exported image sequence instead of a raw video (a
+frame dump some other tool produced), skip `ffmpeg` entirely and just copy
+those image files in directly.
+
+Then sort the resulting `.jpg`/`.jpeg`/`.png` files into these 4 folders
+under `background_footage/`, by weather/lighting condition:
+
+```
+background_footage/
+├── good_light/
+├── dawn_fog_gloom/
+├── evening_night/
+└── rain/
+```
+
+A few things worth knowing before you do this (all covered in detail in
+**`background_footage/README.md`**, which is worth reading in full):
+
+- **Folder names are fixed** -- they come from `BACKGROUND_CONDITIONS` in
+  `pipeline/augment_templates.py`. Rename/add/remove entries there if your
+  own condition set is different.
+- **Multiple videos can share one folder.** If you have footage from
+  several different rides all shot in good daylight, extract frames from
+  all of them and drop everything into `good_light/` together -- the
+  pipeline doesn't care which video a frame came from.
+- **File names are unrestricted** -- no naming convention is expected or
+  parsed. The only rule is uniqueness *within* one folder (two different
+  videos both exporting `frame_00001.jpg` into the same folder will
+  silently overwrite one of them -- prefix by source if that's a risk,
+  e.g. `ride1_frame_00001.jpg` / `ride2_frame_00001.jpg`).
+- **Every one of the 4 folders needs to exist with at least one image in
+  it**, or generation crashes the moment that condition gets sampled --
+  see the Troubleshooting section in `background_footage/README.md`.
+- **Optional**: add an `annotated_frames.txt` inside any condition folder
+  whose footage might contain a real sign somewhere in frame, listing one
+  filename per line to exclude -- keeps a real sign from ever leaking into
+  a synthetic composite as background clutter.
+
+### Step 3 -- (optional) regenerate the SVG templates
+
+Not required -- the repo already ships a full set under `templates/`. Only
+run these if you've edited a `generate_*_templates.py` script's value list
+(Section "Common tasks" below) and want the templates on disk to catch up:
+
+```bash
 python pipeline/generate_rychlostnik_templates.py
 python pipeline/generate_radiovnik_templates.py
 python pipeline/generate_stanicnik_templates.py
 python pipeline/generate_sklonovnik_templates.py
+```
 
-# 2. put your own real background photos under background_footage/
-#    (see background_footage/README.md for the expected layout)
+### Step 4 -- generate the training dataset
 
-# 3. generate the training dataset
+```bash
 python pipeline/augment_templates.py
 ```
 
-Output lands in `output/augmented_templates/<template_key>/`, one PNG per
-generated variant.
+This is the main run. It prints progress per template as it goes, reads
+every SVG under `templates/` and every image under `background_footage/`,
+and writes output to `output/augmented_templates/<template_key>/`, one PNG
+per generated variant. It's safe to interrupt and re-run -- files that
+already exist on disk are skipped, so re-running after adding new footage
+or a new template only generates what's missing.
 
 ---
 
