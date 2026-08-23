@@ -1,0 +1,6 @@
+<svg width="210" height="350" viewBox="0 0 210 350" xmlns="http://www.w3.org/2000/svg">
+<rect width="210" height="350" rx="18" fill="#F7F6F2"/>
+<rect width="210" height="350" rx="18" fill="none" stroke="black" stroke-width="4"/>
+<text x="105.0" y="172.0" font-family="Helvetica Neue" font-weight="bold" font-size="140" text-anchor="middle" fill="black">23</text>
+<text x="105.0" y="292.0" font-family="Helvetica Neue" font-weight="bold" font-size="140" text-anchor="middle" fill="black">0</text>
+</svg>

@@ -1,0 +1,8 @@
+<svg width="400" height="1600" viewBox="0 0 400 1600" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="2" y="2" width="396" height="1596" fill="white"/>
+<rect x="2" y="2" width="396" height="1596" stroke="black" stroke-width="4"/>
+<rect width="400" height="130" transform="translate(0 230)" fill="black"/>
+<rect width="400" height="130" transform="translate(0 540)" fill="black"/>
+<rect width="400" height="130" transform="translate(0 850)" fill="black"/>
+<rect width="400" height="130" transform="translate(0 1160)" fill="black"/>
+</svg>

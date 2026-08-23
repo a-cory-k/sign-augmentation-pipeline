@@ -1,0 +1,18 @@
+# Generated training images -- large, fully regeneratable from templates/ +
+# background_footage/ by running the scripts in this repo. Not source data.
+/output/
+
+# Real background footage -- typically large and/or not something you want
+# to commit to git wholesale. Keep the folder structure documented in
+# README.md / background_footage/README.md, but not the actual photos.
+/background_footage/*/
+!/background_footage/README.md
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# OS cruft
+.DS_Store
