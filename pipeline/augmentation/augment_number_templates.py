@@ -21,15 +21,11 @@ Output: <config.OUTPUT_DIR>/<key>/variant_NN_<condition>[_pass].png
 """
 import random
 import re
-import sys
-from pathlib import Path
 from typing import Callable
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import numpy as np
 
-from augment_templates import (
+from .augment_templates import (
     CANVAS_SCALE,
     HARD_VARIANTS_PER_TEMPLATE,
     LOWRES_VARIANTS_PER_TEMPLATE,
@@ -41,13 +37,13 @@ from augment_templates import (
     load_background_pools,
     rotated_bbox_size,
 )
-from config import OUTPUT_DIR
-from svg_render import render_svg_string
+from ..core.config import OUTPUT_DIR
+from ..core.svg_render import render_svg_string
 
-import generate_radiovnik_templates as radiovnik
-import generate_rychlostnik_templates as rychlostnik
-import generate_sklonovnik_templates as sklonovnik
-import generate_stanicnik_templates as stanicnik
+from ..generators import generate_radiovnik_templates as radiovnik
+from ..generators import generate_rychlostnik_templates as rychlostnik
+from ..generators import generate_sklonovnik_templates as sklonovnik
+from ..generators import generate_stanicnik_templates as stanicnik
 
 random.seed(0)
 np.random.seed(0)

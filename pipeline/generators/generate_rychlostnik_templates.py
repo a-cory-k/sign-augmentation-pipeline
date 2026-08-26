@@ -36,11 +36,7 @@ Usage: python generate_rychlostnik_templates.py
 Output: <config.TEMPLATES_DIR>/rychlostnik/rychlostnik_<n>.svg (single-line)
         <config.TEMPLATES_DIR>/rychlostnik/rychlostnik_<a>_<b>.svg (stacked two-line)
 """
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from config import TEMPLATES_DIR as _TEMPLATES_ROOT
+from ..core.config import TEMPLATES_DIR as _TEMPLATES_ROOT
 
 TEMPLATES_DIR = _TEMPLATES_ROOT / "rychlostnik"
 

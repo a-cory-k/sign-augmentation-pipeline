@@ -22,12 +22,8 @@ and re-run this script to cover different or additional values.
 Usage: python generate_sklonovnik_templates.py
 Output: <config.TEMPLATES_DIR>/sklonovnik/sklonovnik_<increase|decrease>_<first>_<second>.svg
 """
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from config import TEMPLATES_DIR as _TEMPLATES_ROOT
-from digit_glyphs import digit_paths, make_digit_chains
+from ..core.config import TEMPLATES_DIR as _TEMPLATES_ROOT
+from .digit_glyphs import digit_paths, make_digit_chains
 
 TEMPLATES_DIR = _TEMPLATES_ROOT / "sklonovnik"
 

@@ -25,11 +25,7 @@ available, or to cover additional values.
 Usage: python generate_radiovnik_templates.py
 Output: <config.TEMPLATES_DIR>/radiovnik/radiovnik_<nn>.svg
 """
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from config import TEMPLATES_DIR as _TEMPLATES_ROOT
+from ..core.config import TEMPLATES_DIR as _TEMPLATES_ROOT
 
 TEMPLATES_DIR = _TEMPLATES_ROOT / "radiovnik"
 

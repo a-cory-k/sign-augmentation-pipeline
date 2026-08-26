@@ -25,11 +25,7 @@ edit these and re-run this script to cover different or additional values.
 Usage: python generate_stanicnik_templates.py
 Output: <config.TEMPLATES_DIR>/stanicnik/stanicnik_<split|comma>_<...>[_yellow].svg
 """
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from config import TEMPLATES_DIR as _TEMPLATES_ROOT
+from ..core.config import TEMPLATES_DIR as _TEMPLATES_ROOT
 
 TEMPLATES_DIR = _TEMPLATES_ROOT / "stanicnik"
 

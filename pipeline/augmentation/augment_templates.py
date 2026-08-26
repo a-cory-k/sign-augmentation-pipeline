@@ -40,17 +40,14 @@ Output: <config.OUTPUT_DIR>/<template_key>/variant_NN_<condition>[_pass].png
         output directory only writes the new files.)
 """
 import random
-import sys
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import cv2
 import numpy as np
 
-from background_loader import load_random_frames
-from config import BACKGROUND_DIR, OUTPUT_DIR, TEMPLATES_DIR
-from svg_render import get_svg_manager, load_svg_templates, render_svg_template
+from ..core.background_loader import load_random_frames
+from ..core.config import BACKGROUND_DIR, OUTPUT_DIR, TEMPLATES_DIR
+from ..core.svg_render import get_svg_manager, load_svg_templates, render_svg_template
 
 random.seed(0)
 np.random.seed(0)

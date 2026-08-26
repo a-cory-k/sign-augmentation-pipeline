@@ -22,20 +22,27 @@ every script.
 
 ```
 sign-augmentation-pipeline/
-├── pipeline/                           # all code lives here
-│   ├── config.py                          # all configurable paths, one place
-│   ├── svg_render.py                      # SVG loading + rasterizing
-│   ├── background_loader.py               # real-photo background loading
-│   ├── digit_glyphs.py                    # procedural digit-drawing (seven-segment style)
-│   ├── digit_glyphs_rounded.py            # procedural digit-drawing (rounded style) -- currently unused
+├── pipeline/                            # a real Python package (has __init__.py)
+│   ├── __init__.py
+│   ├── core/                               # portability layer -- no external dependency
+│   │   ├── __init__.py
+│   │   ├── config.py                          # all configurable paths, one place
+│   │   ├── svg_render.py                      # SVG loading + rasterizing
+│   │   └── background_loader.py               # real-photo background loading
 │   │
-│   ├── generate_rychlostnik_templates.py  # builds templates/rychlostnik/*.svg
-│   ├── generate_radiovnik_templates.py    # builds templates/radiovnik/*.svg
-│   ├── generate_stanicnik_templates.py    # builds templates/stanicnik/*.svg
-│   ├── generate_sklonovnik_templates.py   # builds templates/sklonovnik/*.svg
+│   ├── generators/                         # builds the static SVG templates
+│   │   ├── __init__.py
+│   │   ├── digit_glyphs.py                    # procedural digit-drawing (seven-segment style)
+│   │   ├── digit_glyphs_rounded.py            # procedural digit-drawing (rounded style) -- unused
+│   │   ├── generate_rychlostnik_templates.py  # builds templates/rychlostnik/*.svg
+│   │   ├── generate_radiovnik_templates.py    # builds templates/radiovnik/*.svg
+│   │   ├── generate_stanicnik_templates.py    # builds templates/stanicnik/*.svg
+│   │   └── generate_sklonovnik_templates.py   # builds templates/sklonovnik/*.svg
 │   │
-│   ├── augment_templates.py               # the main augmentation pipeline
-│   └── augment_number_templates.py        # companion: randomized numeric variants
+│   └── augmentation/                       # the augmentation pipeline itself
+│       ├── __init__.py
+│       ├── augment_templates.py               # the main entry point
+│       └── augment_number_templates.py        # companion: randomized numeric variants
 │
 ├── templates/                         # SVG source files (bundled, ~150 files, 628KB)
 ├── background_footage/                # real photos to composite onto (you supply these)
@@ -50,10 +57,19 @@ sign-augmentation-pipeline/
 └── .gitignore
 ```
 
-All paths in `config.py` resolve relative to the project root (two levels
-up from `pipeline/config.py`) — `templates/`, `background_footage/`, and
-`output/` stay at the top level regardless of where the code that reads
-them lives.
+`pipeline/` is a real Python package (every subfolder has an `__init__.py`),
+so cross-module imports are ordinary package imports (e.g.
+`from ..core.config import TEMPLATES_DIR`), not path hacks. The practical
+consequence: **run every script with `python -m`, from the project root**
+(e.g. `python -m pipeline.augmentation.augment_templates`) rather than
+`python pipeline/augmentation/augment_templates.py` directly -- a relative
+import only resolves when Python knows the file's package context, which
+`-m` provides and a bare file path does not.
+
+All paths in `pipeline/core/config.py` resolve relative to the project root
+(three levels up from that file, since it now lives two levels below
+`pipeline/`) — `templates/`, `background_footage/`, and `output/` stay at
+the top level regardless of where the code that reads them lives.
 
 **Two stages, run in this order:**
 
@@ -161,16 +177,16 @@ run these if you've edited a `generate_*_templates.py` script's value list
 (Section "Common tasks" below) and want the templates on disk to catch up:
 
 ```bash
-python pipeline/generate_rychlostnik_templates.py
-python pipeline/generate_radiovnik_templates.py
-python pipeline/generate_stanicnik_templates.py
-python pipeline/generate_sklonovnik_templates.py
+python -m pipeline.generators.generate_rychlostnik_templates
+python -m pipeline.generators.generate_radiovnik_templates
+python -m pipeline.generators.generate_stanicnik_templates
+python -m pipeline.generators.generate_sklonovnik_templates
 ```
 
 ### Step 4 -- generate the training dataset
 
 ```bash
-python pipeline/augment_templates.py
+python -m pipeline.augmentation.augment_templates
 ```
 
 This is the main run. It prints progress per template as it goes, reads
@@ -184,7 +200,14 @@ or a new template only generates what's missing.
 
 ## Script reference
 
-All files below live under `pipeline/` (e.g. `pipeline/config.py`, `pipeline/augment_templates.py`) — referred to here by filename alone for brevity.
+`pipeline/` is a real Python package, organized into three subpackages by
+role: `core/` (portability layer), `generators/` (template generation),
+`augmentation/` (the augmentation pipeline itself). Files below are grouped
+the same way and referred to by filename alone for brevity within each
+group. Remember every script needs `python -m pipeline.<subpackage>.<name>`
+to run (see "Project structure" above for why).
+
+### Core (`pipeline/core/`)
 
 ### `config.py`
 
@@ -249,6 +272,8 @@ into SVG `<path>` `d` strings, positioned at a given offset).
 Neither module reads or writes any files — they're pure geometry helpers,
 imported by the `generate_*_templates.py` scripts that need them.
 
+### Generators (`pipeline/generators/`)
+
 ### `generate_<class>_templates.py` (four scripts)
 
 Each of these builds the static SVG templates for one sign class, writing
@@ -277,11 +302,13 @@ approach it replaced (e.g. rychlostnik's font was originally hand-drawn in
 a seven-segment style that didn't match real photographs at all; see the
 docstring for the full story).
 
+### Augmentation (`pipeline/augmentation/`)
+
 ### `augment_templates.py`
 
 The main augmentation pipeline, and the largest file in this project. Run
-directly (`python augment_templates.py`) to regenerate the entire dataset
-from whatever's currently in `templates/`.
+directly (`python -m pipeline.augmentation.augment_templates`) to
+regenerate the entire dataset from whatever's currently in `templates/`.
 
 **What it does, end to end (see `main()`):**
 
@@ -376,9 +403,9 @@ represents).
 automatically on the next run, no code changes needed.
 
 **Add a new numeric-value class:** write a new
-`generate_<class>_templates.py` following the pattern of the existing four
-— a `build_svg(...)` function, a curated list of representative values, a
-`main()` that writes one `.svg` per value under
+`generate_<class>_templates.py` under `pipeline/generators/`, following the
+pattern of the existing four — a `build_svg(...)` function, a curated list
+of representative values, a `main()` that writes one `.svg` per value under
 `<config.TEMPLATES_DIR>/<class_name>/`.
 
 **Change which specific values a numeric class covers:** edit the value

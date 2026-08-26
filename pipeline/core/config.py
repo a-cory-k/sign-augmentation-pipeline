@@ -28,12 +28,12 @@ drive, a different disk), just export the relevant variable before running
 any script, e.g.:
 
     export SIGN_BACKGROUND_DIR=/mnt/shared/rail_footage
-    python augment_templates.py
+    python -m pipeline.augmentation.augment_templates
 """
 import os
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent  # this file lives in pipeline/, one level below the project root
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent  # this file lives in pipeline/core/, two levels below the project root
 
 TEMPLATES_DIR = Path(os.environ.get("SIGN_TEMPLATES_DIR", PROJECT_ROOT / "templates"))
 BACKGROUND_DIR = Path(os.environ.get("SIGN_BACKGROUND_DIR", PROJECT_ROOT / "background_footage"))

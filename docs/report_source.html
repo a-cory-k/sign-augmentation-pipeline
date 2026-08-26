@@ -693,14 +693,19 @@ balanced.
 
 <h1>10. Script Reference</h1>
 <p>
-The pipeline is implemented as a set of Python files, provided in full alongside this report
-under the project's <code>pipeline/</code> subfolder (all files sit side by side there, so
-every import between them is still a plain same-directory import -- no package path
-configuration is required to run any script directly). File names below are given without
-the <code>pipeline/</code> prefix for brevity.
+The pipeline is implemented as a real Python package, provided in full alongside this report
+under the project's <code>pipeline/</code> folder, organized into three subpackages by role
+&mdash; <code>core/</code> (portability layer), <code>generators/</code> (template
+generation), <code>augmentation/</code> (the augmentation pipeline itself) &mdash; each with
+its own <code>__init__.py</code>. Cross-module imports are ordinary package imports (e.g.
+<code>from ..core.config import TEMPLATES_DIR</code>), which means every script must be run
+with <code>python -m pipeline.&lt;subpackage&gt;.&lt;name&gt;</code> from the project root,
+not as a bare file path &mdash; a relative import only resolves once Python knows the file's
+package context, which <code>-m</code> provides and a direct file path does not. File names
+below are given without their subpackage prefix for brevity, grouped to match.
 </p>
 
-<h2>10.1 Portability layer</h2>
+<h2>10.1 Portability layer &mdash; <code>pipeline/core/</code></h2>
 <p>
 Three small modules exist purely so this project has no dependency on anything outside
 itself:
@@ -725,7 +730,7 @@ itself:
     that ships with this project).</td></tr>
 </table>
 
-<h2>10.2 Template generation</h2>
+<h2>10.2 Template generation &mdash; <code>pipeline/generators/</code></h2>
 <table>
 <tr><th>File</th><th>Produces</th></tr>
 <tr><td><code>generate_rychlostnik_templates.py</code></td>
@@ -756,7 +761,7 @@ specific values (e.g. which speed values get a template) is a plain, easily edit
 list near the bottom of that file -- see the README for how to change it.
 </p>
 
-<h2>10.3 Augmentation pipeline</h2>
+<h2>10.3 Augmentation pipeline &mdash; <code>pipeline/augmentation/</code></h2>
 <p><code>augment_templates.py</code> is the main orchestrator described throughout this
 document. Key entry points:</p>
 <table>
@@ -800,10 +805,10 @@ run by default -- see Section 2.1.
 <p><strong>Output convention (both scripts):</strong></p>
 <p><code>&lt;config.OUTPUT_DIR&gt;/&lt;template_key&gt;/variant_&lt;NN&gt;_&lt;condition&gt;[_&lt;pass_suffix&gt;].png</code>
 (defaults to <code>./output/augmented_templates/...</code> inside the project)</p>
-<p><strong>Usage:</strong></p>
+<p><strong>Usage</strong> (always <code>python -m ...</code>, from the project root):</p>
 <p><code>pip install -r requirements.txt</code> &nbsp;(one-time setup)<br>
-<code>python pipeline/generate_&lt;class&gt;_templates.py</code> &nbsp;(template generation, per class, as needed)<br>
-<code>python pipeline/augment_templates.py</code> &nbsp;(regenerates every template&rsquo;s augmented images)<br>
-<code>python pipeline/augment_number_templates.py</code> &nbsp;(optional, dynamic-value classes)</p>
+<code>python -m pipeline.generators.generate_&lt;class&gt;_templates</code> &nbsp;(template generation, per class, as needed)<br>
+<code>python -m pipeline.augmentation.augment_templates</code> &nbsp;(regenerates every template&rsquo;s augmented images)<br>
+<code>python -m pipeline.augmentation.augment_number_templates</code> &nbsp;(optional, dynamic-value classes)</p>
 </body>
 </html>

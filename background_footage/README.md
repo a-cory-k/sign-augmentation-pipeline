@@ -4,7 +4,7 @@ This folder is where the pipeline looks for real background photographs,
 one subfolder per weather/lighting condition. It's empty in a fresh clone
 (the actual photos are excluded via `.gitignore` -- they're your own
 footage, not part of this codebase) -- you need to populate it before
-running `augment_templates.py` or `augment_number_templates.py`.
+running `pipeline.augmentation.augment_templates` or `pipeline.augmentation.augment_number_templates`.
 
 ## 1. Video (or an image sequence) needs to become plain image files first
 
@@ -52,7 +52,7 @@ background_footage/
 ```
 
 - The four condition folder names (`good_light`, `dawn_fog_gloom`,
-  `evening_night`, `rain`) are read from `pipeline/augment_templates.py`'s
+  `evening_night`, `rain`) are read from `pipeline/augmentation/augment_templates.py`'s
   `BACKGROUND_CONDITIONS` list -- rename/add/remove conditions there to
   match whatever footage you actually have. If you only have footage for
   2 conditions, either delete the other two entries from that list, or
@@ -112,7 +112,7 @@ Skip this file entirely for footage you're sure has no signs in it at all
 ## 5. How many frames do you need
 
 The pipeline defaults to sampling up to 20 frames per condition per run
-(`N_BACKGROUND_FRAMES_PER_CONDITION` in `pipeline/augment_templates.py`).
+(`N_BACKGROUND_FRAMES_PER_CONDITION` in `pipeline/augmentation/augment_templates.py`).
 It'll happily run with fewer -- but **every condition folder listed in
 `BACKGROUND_CONDITIONS` needs to exist and contain at least one image**,
 or generation will crash the first time that condition gets sampled (see
@@ -125,7 +125,7 @@ well before you'd need "every frame from every video."
 - **`FileNotFoundError: Background condition folder not found`** -- one of
   the folders listed in `BACKGROUND_CONDITIONS` doesn't exist on disk yet.
   Create it (even with just one image inside), or remove that condition
-  from the list in `pipeline/augment_templates.py` if you don't have that
+  from the list in `pipeline/augmentation/augment_templates.py` if you don't have that
   kind of footage.
 - **`IndexError: Cannot choose from an empty sequence`** (or similar,
   during generation) -- a condition folder exists but has zero valid image
@@ -136,9 +136,9 @@ well before you'd need "every frame from every video."
 
 Override this default location entirely with the `SIGN_BACKGROUND_DIR`
 environment variable if your footage lives elsewhere (a different disk, a
-shared drive) -- see `pipeline/config.py`:
+shared drive) -- see `pipeline/core/config.py`:
 
 ```bash
 export SIGN_BACKGROUND_DIR=/mnt/shared/rail_footage
-python pipeline/augment_templates.py
+python -m pipeline.augmentation.augment_templates
 ```
